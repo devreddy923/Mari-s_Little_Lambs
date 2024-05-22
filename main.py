@@ -190,7 +190,7 @@ def display_home():
 # Function to display the metrics page, including Excel file display and calendars
 def display_metrics_page():
     st.markdown('<div class="title">Mari\'s Little Lambs</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">Availability Date Results</div>', unsafe_allow_html=True)
+    st.markdown('<div class="subtitle">Schedule Availability as on the Requested Joining Date</div>', unsafe_allow_html=True)
 
     metrics = st.session_state.get('metrics', {})
 
@@ -248,18 +248,26 @@ def display_metrics_page():
 
     # Convert schedule available data into a table format
     schedule_available_raw = metrics.get('Schedule Available', "N/A")
+    classroom_capacities = {
+        "Infants": 8,
+        "Wobblers": 12,
+        "Older Toddlers": 16,
+        "Preschool": 20
+    }
+
     if schedule_available_raw != "N/A":
         days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
         classes = ["Infants", "Wobblers", "Older Toddlers", "Preschool"]
         schedule_data = schedule_available_raw.split()[5:]  # Adjusted to skip the first 5 non-numeric entries
 
-        schedule_table_html = "<table class='schedule-table'><thead><tr><th>Class/Day</th>"
+        schedule_table_html = "<table class='schedule-table'><thead><tr><th>Class/Day</th><th>Classroom Capacities</th>"
         for day in days:
             schedule_table_html += f"<th>{day}</th>"
         schedule_table_html += "</tr></thead><tbody>"
 
         for class_idx, class_name in enumerate(classes):
-            schedule_table_html += f"<tr><td>{class_name}</td>"
+            capacity = classroom_capacities[class_name]
+            schedule_table_html += f"<tr><td>{class_name}</td><td>{capacity}</td>"
             for day_idx in range(len(days)):
                 student_count = schedule_data[class_idx * len(days) + day_idx]
                 schedule_table_html += f"<td>{student_count}</td>"
@@ -293,7 +301,7 @@ def display_metrics_page():
     with file_col1:
         st.markdown('**Active List**')
         if 'active_file' in st.session_state and st.session_state['active_file'] is not None:
-            df_active = pd.read_excel(st.session_state['active_file'])
+            df_active = pd.read_excel(st.session_state['active_file'], header=4)  # Set 5th row as header
             st.dataframe(df_active)
         else:
             st.write("No active list uploaded.")
@@ -301,7 +309,7 @@ def display_metrics_page():
     with file_col2:
         st.markdown('**Hold List**')
         if 'hold_file' in st.session_state and st.session_state['hold_file'] is not None:
-            df_hold = pd.read_excel(st.session_state['hold_file'])
+            df_hold = pd.read_excel(st.session_state['hold_file'], header=4)  # Set 5th row as header
             st.dataframe(df_hold)
         else:
             st.write("No hold list uploaded.")
@@ -309,16 +317,14 @@ def display_metrics_page():
     with file_col3:
         st.markdown('**FTE List**')
         if 'fte_file' in st.session_state and st.session_state['fte_file'] is not None:
-            df_fte = pd.read_excel(st.session_state['fte_file'])
+            df_fte = pd.read_excel(st.session_state['fte_file'], header=4)  # Set 5th row as header
             st.dataframe(df_fte)
         else:
             st.write("No FTE list uploaded.")
 
-
 def show_loading_animation():
     with st.spinner('Checking Availability...'):
         time.sleep(2)
-
 
 # Page routing
 if 'page' not in st.session_state:
