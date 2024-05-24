@@ -1,4 +1,3 @@
-# Import necessary libraries
 import streamlit as st
 import calendar
 import random
@@ -9,115 +8,259 @@ import backend  # Import the backend script
 # Set Streamlit page configuration
 st.set_page_config(page_title="Mari's Little Lambs", layout="wide")
 
-# Inject custom CSS for additional dark mode styling
+# Inject JavaScript to detect the color scheme and apply the appropriate stylesheet
 st.markdown("""
-            <style>
-            @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@200&display=swap');
+    <script>
+    function detectColorScheme() {
+        var theme = "light";    //default to light
 
-            html, body, h1, h2, h3, h4, h5, h6, div, span, p, .stButton>button, .stFileUploader, .stTextInput>div>div>input {
-                font-family: 'Nunito', sans-serif;
-                font-weight: 200;
+        //local storage is used to override OS theme settings
+        if(localStorage.getItem("theme")) {
+            if(localStorage.getItem("theme") == "dark") {
+                theme = "dark";
             }
+        } else if(!window.matchMedia) {
+            //matchMedia method not supported
+            return false;
+        } else if(window.matchMedia("(prefers-color-scheme: dark)").matches) {
+            //OS theme setting detected as dark
+            theme = "dark";
+        }
 
-            body {
-                background-color: #333; /* Dark background */
-                color: #fff; /* Light text */
-            }
+        if (theme == "dark") {
+            document.getElementById("dark-mode-styles").disabled = false;
+            document.getElementById("light-mode-styles").disabled = true;
+        } else {
+            document.getElementById("dark-mode-styles").disabled = true;
+            document.getElementById("light-mode-styles").disabled = false;
+        }
+    }
 
-            .title {
-                font-size: 48px;
-                font-weight: bold;
-                text-align: center;
-                margin: 20px;
-            }
+    detectColorScheme();
+    </script>
+    """, unsafe_allow_html=True)
 
-            .subtitle {
-                font-size: 24px;
-                text-align: center;
-                margin: 10px;
-            }
+# Inject custom CSS for light mode styling
+st.markdown("""
+    <style id="light-mode-styles">
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@200&display=swap');
 
-            .upload-box {
-                border: 2px dashed #aaa;
-                border-radius: 10px;
-                padding: 20px;
-                margin: 10px 0;
-                text-align: center;
-            }
+    html, body, h1, h2, h3, h4, h5, h6, div, span, p, .stButton>button, .stFileUploader, .stTextInput>div>div>input {
+        font-family: 'Nunito', sans-serif;
+        font-weight: 200;
+    }
 
-            .stFileUploader {
-                margin: 15px;
-            }
+    body {
+        background-color: #fff; /* Light background */
+        color: #000; /* Dark text */
+    }
 
-            .stButton>button {
-                width: 100%;
-                border-radius: 20px;
-                border: none;
-                background-color: #4CAF50;
-                color: white;
-                padding: 14px 20px;
-                margin: 8px 0;
-                cursor: pointer;
-            }
+    .title {
+        font-size: 48px;
+        font-weight: bold;
+        text-align: center;
+        margin: 20px;
+    }
 
-            .stButton>button:hover {
-                background-color: #45a049;
-            }
+    .subtitle {
+        font-size: 24px;
+        text-align: center;
+        margin: 10px;
+    }
 
-            .metric-box {
-                display: flex;
-                flex-direction: column;
-                justify-content: space-between;
-                align-items: center;
-                padding: 15px;
-                margin: 15px;
-                background-color: transparent;
-                border-radius: 10px;
-                border: 2px solid #fff;
-                box-shadow: 0px 2px 4px rgba(0,0,0,0.1);
-                text-align: center;
-                flex: 1 1 22%; /* Adjusting flex to increase width by 20% */
-                min-height: 150px; /* Minimum height for uniformity */
-            }
+    .upload-box {
+        border: 2px dashed #aaa;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 10px 0;
+        text-align: center;
+    }
 
-            .metric-box h4 {
-                margin: 0;
-                font-size: 1em;
-                color: #fff;
-            }
+    .stFileUploader {
+        margin: 15px;
+    }
 
-            .metric-box p {
-                font-size: 1.5em;
-                font-weight: bold;
-                color: #4CAF50;
-                margin: 5px 0 0 0;
-                align-self: center;
-            }
+    .stButton>button {
+        width: 100%;
+        border-radius: 20px;
+        border: none;
+        background-color: #4CAF50;
+        color: white;
+        padding: 14px 20px;
+        margin: 8px 0;
+        cursor: pointer;
+    }
 
-            .schedule-table {
-                margin: 15px;
-                border: 2px solid #fff;
-                border-radius: 10px;
-                background-color: transparent;
-                text-align: center;
-                color: #4CAF50;
-                padding: 10px;
-                width: 100%;
-                box-shadow: 0px 2px 4px rgba(0,0,0,0.1);
-            }
+    .stButton>button:hover {
+        background-color: #45a049;
+    }
 
-            .schedule-table th, .schedule-table td {
-                padding: 10px;
-                border: 1px solid #fff;
-            }
+    .metric-box {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        margin: 15px;
+        background-color: transparent;
+        border-radius: 10px;
+        border: 2px solid #000;  /* Dark border for light mode */
+        box-shadow: 0px 2px 4px rgba(0,0,0,0.1);
+        text-align: center;
+        flex: 1 1 22%; /* Adjusting flex to increase width by 20% */
+        min-height: 150px; /* Minimum height for uniformity */
+    }
 
-            .schedule-table table {
-                width: 100%;
-                border-collapse: collapse;
-            }
+    .metric-box h4 {
+        margin: 0;
+        font-size: 1em;
+        color: #000;
+    }
 
-            </style>
-            """, unsafe_allow_html=True)
+    .metric-box p {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #4CAF50;
+        margin: 5px 0 0 0;
+        align-self: center;
+    }
+
+    .schedule-table {
+        margin: 15px;
+        border: 2px solid #000;  /* Dark border for light mode */
+        border-radius: 10px;
+        background-color: transparent;
+        text-align: center;
+        color: #4CAF50;
+        padding: 10px;
+        width: 100%;
+        box-shadow: 0px 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .schedule-table th, .schedule-table td {
+        padding: 10px;
+        border: 1px solid #000;  /* Dark border for light mode */
+        color: #000; /* Ensuring text color is set */
+    }
+
+    .schedule-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    </style>
+    """, unsafe_allow_html=True)
+
+# Inject custom CSS for dark mode styling
+st.markdown("""
+    <style id="dark-mode-styles" disabled>
+    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@200&display=swap');
+
+    html, body, h1, h2, h3, h4, h5, h6, div, span, p, .stButton>button, .stFileUploader, .stTextInput>div>div>input {
+        font-family: 'Nunito', sans-serif;
+        font-weight: 200;
+    }
+
+    body {
+        background-color: #333; /* Dark background */
+        color: #fff; /* Light text */
+    }
+
+    .title {
+        font-size: 48px;
+        font-weight: bold;
+        text-align: center;
+        margin: 20px;
+    }
+
+    .subtitle {
+        font-size: 24px;
+        text-align: center;
+        margin: 10px;
+    }
+
+    .upload-box {
+        border: 2px dashed #aaa;
+        border-radius: 10px;
+        padding: 20px;
+        margin: 10px 0;
+        text-align: center;
+    }
+
+    .stFileUploader {
+        margin: 15px;
+    }
+
+    .stButton>button {
+        width: 100%;
+        border-radius: 20px;
+        border: none;
+        background-color: #4CAF50;
+        color: white;
+        padding: 14px 20px;
+        margin: 8px 0;
+        cursor: pointer;
+    }
+
+    .stButton>button:hover {
+        background-color: #45a049;
+    }
+
+    .metric-box {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        margin: 15px;
+        background-color: transparent;
+        border-radius: 10px;
+        border: 2px solid #fff;  /* Light border for dark mode */
+        box-shadow: 0px 2px 4px rgba(0,0,0,0.1);
+        text-align: center;
+        flex: 1 1 22%; /* Adjusting flex to increase width by 20% */
+        min-height: 150px; /* Minimum height for uniformity */
+    }
+
+    .metric-box h4 {
+        margin: 0;
+        font-size: 1em;
+        color: #fff;
+    }
+
+    .metric-box p {
+        font-size: 1.5em;
+        font-weight: bold;
+        color: #4CAF50;
+        margin: 5px 0 0 0;
+        align-self: center;
+    }
+
+    .schedule-table {
+        margin: 15px;
+        border: 2px solid #fff;  /* Light border for dark mode */
+        border-radius: 10px;
+        background-color: transparent;
+        text-align: center;
+        color: #4CAF50;
+        padding: 10px;
+        width: 100%;
+        box-shadow: 0px 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .schedule-table th, .schedule-table td {
+        padding: 10px;
+        border: 1px solid #fff;  /* Light border for dark mode */
+        color: #fff; /* Ensuring text color is set */
+    }
+
+    .schedule-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    </style>
+    """, unsafe_allow_html=True)
 
 # Function to generate a calendar month with randomly colored days
 def generate_colored_month(year, month):
@@ -250,8 +393,8 @@ def display_metrics_page():
     schedule_available_raw = metrics.get('Schedule Available', "N/A")
     classroom_capacities = {
         "Infants": 8,
-        "Wobblers": 12,
-        "Older Toddlers": 16,
+        "Wobblers": 8,
+        "Older Toddlers": 7,
         "Preschool": 20
     }
 
@@ -301,7 +444,7 @@ def display_metrics_page():
     with file_col1:
         st.markdown('**Active List**')
         if 'active_file' in st.session_state and st.session_state['active_file'] is not None:
-            df_active = pd.read_excel(st.session_state['active_file'], header=4)  # Set 5th row as header
+            df_active = pd.read_excel(st.session_state['active_file'], header=4)
             st.dataframe(df_active)
         else:
             st.write("No active list uploaded.")
@@ -309,7 +452,7 @@ def display_metrics_page():
     with file_col2:
         st.markdown('**Hold List**')
         if 'hold_file' in st.session_state and st.session_state['hold_file'] is not None:
-            df_hold = pd.read_excel(st.session_state['hold_file'], header=4)  # Set 5th row as header
+            df_hold = pd.read_excel(st.session_state['hold_file'], header=4)
             st.dataframe(df_hold)
         else:
             st.write("No hold list uploaded.")
@@ -317,7 +460,7 @@ def display_metrics_page():
     with file_col3:
         st.markdown('**FTE List**')
         if 'fte_file' in st.session_state and st.session_state['fte_file'] is not None:
-            df_fte = pd.read_excel(st.session_state['fte_file'], header=4)  # Set 5th row as header
+            df_fte = pd.read_excel(st.session_state['fte_file'], header=3)  # Set 5th row as header
             st.dataframe(df_fte)
         else:
             st.write("No FTE list uploaded.")
