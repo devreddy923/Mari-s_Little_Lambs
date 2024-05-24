@@ -28,11 +28,11 @@ st.markdown("""
         }
 
         if (theme == "dark") {
-            document.getElementById("dark-mode-styles").disabled = false;
-            document.getElementById("light-mode-styles").disabled = true;
+            document.body.classList.add('dark-mode');
+            document.body.classList.remove('light-mode');
         } else {
-            document.getElementById("dark-mode-styles").disabled = true;
-            document.getElementById("light-mode-styles").disabled = false;
+            document.body.classList.add('light-mode');
+            document.body.classList.remove('dark-mode');
         }
     }
 
@@ -42,7 +42,7 @@ st.markdown("""
 
 # Inject custom CSS for light mode styling
 st.markdown("""
-    <style id="light-mode-styles">
+    <style>
     @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@200&display=swap');
 
     html, body, h1, h2, h3, h4, h5, h6, div, span, p, .stButton>button, .stFileUploader, .stTextInput>div>div>input {
@@ -50,118 +50,12 @@ st.markdown("""
         font-weight: 200;
     }
 
-    body {
+    .light-mode {
         background-color: #fff; /* Light background */
         color: #000; /* Dark text */
     }
 
-    .title {
-        font-size: 48px;
-        font-weight: bold;
-        text-align: center;
-        margin: 20px;
-    }
-
-    .subtitle {
-        font-size: 24px;
-        text-align: center;
-        margin: 10px;
-    }
-
-    .upload-box {
-        border: 2px dashed #aaa;
-        border-radius: 10px;
-        padding: 20px;
-        margin: 10px 0;
-        text-align: center;
-    }
-
-    .stFileUploader {
-        margin: 15px;
-    }
-
-    .stButton>button {
-        width: 100%;
-        border-radius: 20px;
-        border: none;
-        background-color: #4CAF50;
-        color: white;
-        padding: 14px 20px;
-        margin: 8px 0;
-        cursor: pointer;
-    }
-
-    .stButton>button:hover {
-        background-color: #45a049;
-    }
-
-    .metric-box {
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-        align-items: center;
-        padding: 15px;
-        margin: 15px;
-        background-color: transparent;
-        border-radius: 10px;
-        border: 2px solid #000;  /* Dark border for light mode */
-        box-shadow: 0px 2px 4px rgba(0,0,0,0.1);
-        text-align: center;
-        flex: 1 1 22%; /* Adjusting flex to increase width by 20% */
-        min-height: 150px; /* Minimum height for uniformity */
-    }
-
-    .metric-box h4 {
-        margin: 0;
-        font-size: 1em;
-        color: #000;
-    }
-
-    .metric-box p {
-        font-size: 1.5em;
-        font-weight: bold;
-        color: #4CAF50;
-        margin: 5px 0 0 0;
-        align-self: center;
-    }
-
-    .schedule-table {
-        margin: 15px;
-        border: 2px solid #000;  /* Dark border for light mode */
-        border-radius: 10px;
-        background-color: transparent;
-        text-align: center;
-        color: #4CAF50;
-        padding: 10px;
-        width: 100%;
-        box-shadow: 0px 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .schedule-table th, .schedule-table td {
-        padding: 10px;
-        border: 1px solid #000;  /* Dark border for light mode */
-        color: #000; /* Ensuring text color is set */
-    }
-
-    .schedule-table table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    </style>
-    """, unsafe_allow_html=True)
-
-# Inject custom CSS for dark mode styling
-st.markdown("""
-    <style id="dark-mode-styles" disabled>
-    @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@200&display=swap');
-
-    html, body, h1, h2, h3, h4, h5, h6, div, span, p, .stButton>button, .stFileUploader, .stTextInput>div>div>input {
-        font-family: 'Nunito', sans-serif;
-        font-weight: 200;
-    }
-
-    body {
+    .dark-mode {
         background-color: #333; /* Dark background */
         color: #fff; /* Light text */
     }
@@ -215,17 +109,24 @@ st.markdown("""
         margin: 15px;
         background-color: transparent;
         border-radius: 10px;
-        border: 2px solid #fff;  /* Light border for dark mode */
+        border: 2px solid;  /* Border for both modes */
         box-shadow: 0px 2px 4px rgba(0,0,0,0.1);
         text-align: center;
         flex: 1 1 22%; /* Adjusting flex to increase width by 20% */
         min-height: 150px; /* Minimum height for uniformity */
     }
 
+    .light-mode .metric-box {
+        border-color: #000;  /* Dark border for light mode */
+    }
+
+    .dark-mode .metric-box {
+        border-color: #fff;  /* Light border for dark mode */
+    }
+
     .metric-box h4 {
         margin: 0;
         font-size: 1em;
-        color: #fff;
     }
 
     .metric-box p {
@@ -238,7 +139,6 @@ st.markdown("""
 
     .schedule-table {
         margin: 15px;
-        border: 2px solid #fff;  /* Light border for dark mode */
         border-radius: 10px;
         background-color: transparent;
         text-align: center;
@@ -248,17 +148,32 @@ st.markdown("""
         box-shadow: 0px 2px 4px rgba(0,0,0,0.1);
     }
 
+    .light-mode .schedule-table {
+        border: 2px solid #000;  /* Dark border for light mode */
+    }
+
+    .dark-mode .schedule-table {
+        border: 2px solid #fff;  /* Light border for dark mode */
+    }
+
     .schedule-table th, .schedule-table td {
         padding: 10px;
+    }
+
+    .light-mode .schedule-table th, .light-mode .schedule-table td {
+        border: 1px solid #000;  /* Dark border for light mode */
+        color: #000; /* Dark text for light mode */
+    }
+
+    .dark-mode .schedule-table th, .dark-mode .schedule-table td {
         border: 1px solid #fff;  /* Light border for dark mode */
-        color: #fff; /* Ensuring text color is set */
+        color: #fff; /* Light text for dark mode */
     }
 
     .schedule-table table {
         width: 100%;
         border-collapse: collapse;
     }
-
     </style>
     """, unsafe_allow_html=True)
 
