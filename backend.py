@@ -302,7 +302,8 @@ def process_inputs(name, dob, child_class, schedule_days, program_type, joining_
         'Availability for the requested date': availability,
         'Earliest Available Date': next_available_date.strftime('%Y-%m-%d') if next_available_date else "N/A",
         'Preferred Schedule': ', '.join(schedule),
-        'Schedule Available': schedule_available_str  # Updated line to exclude levels from the dataframe
+        'Schedule Available': schedule_available_str,  # Updated line to exclude levels from the dataframe
+        'Flexible Notice Required': flexible
     }
 
     return metrics
