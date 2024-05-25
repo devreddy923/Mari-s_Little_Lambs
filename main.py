@@ -137,6 +137,19 @@ st.markdown("""
         align-self: center;
     }
 
+    .availability-yes, .availability-no {
+        font-size: 1.5em;
+        font-weight: bold;
+    }
+
+    .availability-yes {
+        color: green;
+    }
+
+    .availability-no {
+        color: red;
+    }
+
     .schedule-table {
         margin: 15px;
         border-radius: 10px;
@@ -240,6 +253,7 @@ def display_home():
                     st.session_state['active_file'] = active_file
                     st.session_state['hold_file'] = hold_file
                     st.session_state['fte_file'] = fte_file
+                    st.session_state['name'] = name
                 else:
                     st.session_state['metrics'] = {}
                 st.session_state.page = 'metrics'
@@ -248,7 +262,7 @@ def display_home():
 # Function to display the metrics page, including Excel file display and calendars
 def display_metrics_page():
     st.markdown('<div class="title">Mari\'s Little Lambs</div>', unsafe_allow_html=True)
-    st.markdown('<div class="subtitle">Schedule Availability as on the Requested Joining Date</div>', unsafe_allow_html=True)
+    st.markdown(f'<div class="subtitle">Schedule Availability as on the Requested Joining Date for {st.session_state["name"]}</div>', unsafe_allow_html=True)
 
     metrics = st.session_state.get('metrics', {})
 
@@ -262,8 +276,8 @@ def display_metrics_page():
         'Kid to staff ratio (coming soon)': "N/A",
         'Wait time in days': "N/A",
         'Availability for the requested date': "N/A",
-        'Earliest Available Date': "<span style='color: green;'>N/A</span>",
-        'Preferred Schedule': "<span style='color: green;'>N/A</span>",
+        'Earliest Available Date': "N/A",
+        'Preferred Schedule': "N/A",
     }
 
     for key in default_metrics:
@@ -272,7 +286,7 @@ def display_metrics_page():
 
     base_metrics = ['Availability for the requested date', 'Earliest Available Date', 'Preferred Schedule']
     non_base_metrics = [(metric_name, metric_value) for metric_name, metric_value in metrics.items() if
-                        metric_name not in base_metrics + ['Schedule Available']]
+                        metric_name not in base_metrics + ['Schedule Available', 'Flexible Notice Required']]
 
     # Ensure uniform box sizes
     cols = st.columns(len(non_base_metrics))
@@ -291,10 +305,9 @@ def display_metrics_page():
         metric_value = metrics[metric_name]
         if metric_name == 'Availability for the requested date':
             if metric_value.lower() == "yes":
-                color = "green"
+                metric_value = f"<span class='availability-yes'>{metric_value}</span>"
             else:
-                color = "red"
-            metric_value = f"<span style='color: {color};'>{metric_value}</span>"
+                metric_value = f"<span class='availability-no'>{metric_value}</span>"
 
         with base_col:
             st.markdown(f"""
@@ -337,11 +350,12 @@ def display_metrics_page():
                     {schedule_table_html}
                     """, unsafe_allow_html=True)
 
-    st.markdown("""
-                <div style="text-align: center; margin-top: 10px;">
-                    <small>Note: This date is only available if a child of flexible schedule is moved.</small>
-                </div>
-                """, unsafe_allow_html=True)
+    if metrics.get('Flexible Notice Required', True):
+        st.markdown("""
+                    <div style="text-align: center; margin-top: 10px;">
+                        <small>Note: This date is only available if a child of flexible schedule is moved.</small>
+                    </div>
+                    """, unsafe_allow_html=True)
 
     st.markdown('<div class="subtitle">Available Dates</div>', unsafe_allow_html=True)
     year = datetime.now().year
